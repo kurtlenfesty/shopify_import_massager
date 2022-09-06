@@ -581,7 +581,7 @@ defmodule ShopifyImportMassagerTest do
       ]
 
       output_file_name =
-        "/qgo/aaa-work/shopify-imports/shopify/test-subs/CREATED_OUTPUT_FILE_1.csv"
+        "/aa-work/shopify-imports/SOME_CUSTOMER/test-subs/CREATED_OUTPUT_FILE_1.csv"
 
       output_file = File.open!(output_file_name, [:write, :utf8])
 

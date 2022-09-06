@@ -1,5 +1,5 @@
-defmodule MaudeMassages do
-  @single_orders_file "/qgo/aaa-solve-work/shopify-imports/dsanddurga/test_subs_1_input/orders_export_6.csv"
+defmodule ShopifyMassages do
+  @single_orders_file "/aa-work/shopify-imports/SOME_CUSTOMER/test_subs_1_input/orders_export_6.csv"
   @all_orders_files [
     "orders_export_1.csv",
     "orders_export_2.csv",
@@ -13,21 +13,21 @@ defmodule MaudeMassages do
 
   @all_transactions_files ["transactions_export_1.csv"]
 
-  # MaudeMassages.massage_single()
+  # ShopifyMassages.massage_single()
   def massage_single() do
     ShopifyImportMassager.extract_substitution_map(@single_orders_file)
   end
 
-  # MaudeMassages.massage_single_and_display()
+  # ShopifyMassages.massage_single_and_display()
   def massage_single_and_display() do
     ShopifyImportMassager.extract_substitution_map(@single_orders_file)
     |> ShopifyImportMassager.display_results()
   end
 
-  # MaudeMassages.massage_all()
+  # ShopifyMassages.massage_all()
   def massage_all() do
-    input_folder = "/qgo/aaa-solve-work/shopify-imports/dsanddurga/test_subs_1_input"
-    output_folder = "/qgo/aaa-solve-work/shopify-imports/dsanddurga/test_subs_1_output"
+    input_folder = "/aa-work/shopify-imports/SOME_CUSTOMER//test_subs_1_input"
+    output_folder = "/aa-work/shopify-imports/SOME_CUSTOMER//test_subs_1_output"
 
     input_files = @all_orders_files
     output_files = @all_orders_files ++ @all_returns_files ++ @all_transactions_files
