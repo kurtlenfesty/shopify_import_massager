@@ -3,19 +3,25 @@ defmodule ShopifyImportMassager do
   Massages csv import files, specifically for a shopify customer.
   """
 
-  @order_number_regex ~r|^#(\d+)$|
+  alias Massager.FilenameGenerator
 
   @doc """
     This is our main function call that does all the work.
   """
+  # TODO
+  # - Handle invalid ranges
   def convert_files(
-        input_folder,
-        output_folder,
-        orders_files_filename_parameters = %{},
-        returns_files_filename_parameters = %{},
-        transactions_files_parameters = %{},
+        %{
+          input_folder: input_folder,
+          output_folder: output_folder,
+          orders_files_filename_parameters: orders_files_filename_parameters = %{},
+          returns_files_filename_parameters: returns_files_filename_parameters = %{},
+          transactions_files_filename_parameters: transactions_files_filename_parameters = %{}
+        },
         options \\ []
       ) do
+    # TODO This function could be a bit more streamlined so it's easier to follow.
+
     IO.puts("Processing START")
 
     # We want the unchanged list of files so we can extract our substitutions
@@ -26,8 +32,8 @@ defmodule ShopifyImportMassager do
         output_path_prefix: "IGNORED",
         number_padding_characters: 0
       })
-      |> MassagerFilenameGenerator.generate_filename_pairs()
-      |> Enum.map(fn {input_filename, _output_filename} -> input_filename end)
+      |> FilenameGenerator.generate_filename_pairs()
+      |> Enum.map(fn %{input_file: input_file} -> input_file end)
 
     substitution_map =
       orders_input_files
@@ -81,20 +87,30 @@ defmodule ShopifyImportMassager do
         substitution_map: substitution_map,
         input_folder: input_folder,
         output_folder: output_folder,
-        filename_parameters: filename_parameters
+        filename_parameters: filename_parameters = %{filename_prefix: _}
       }) do
     Map.merge(filename_parameters, %{
       input_path_prefix: input_folder,
       output_path_prefix: output_folder
     })
-    |> generate_filenames()
-    |> Enum.each(fn {input_file, output_file} ->
+    |> FilenameGenerator.generate_filename_pairs()
+    |> Enum.each(fn %{input_file: input_file, output_file: output_file} ->
       substitute(%{
         substitution_map: substitution_map,
         input_file: input_file,
         output_file: output_file
       })
     end)
+  end
+
+  def substitute(%{
+        substitution_map: _substitution_map,
+        input_folder: _input_folder,
+        output_folder: _output_folder,
+        filename_parameters: _filename_parameters
+      }) do
+    # This handles the case where we don't want to run a certain set of files.
+    :no_op
   end
 
   def substitute(%{

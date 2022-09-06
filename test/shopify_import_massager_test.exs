@@ -5,16 +5,33 @@ defmodule ShopifyImportMassagerTest do
 
   describe "gets substitutions and converts files" do
     test "converts test_orders_1|2|3" do
-      input_folder = "test/source_files"
-      output_folder = "test/output_files"
+      parameters = %{
+        input_folder: "test/source_files",
+        output_folder: "test/output_files",
+        orders_files_filename_parameters: %{
+          filename_prefix: "test_orders_",
+          filename_suffix: ".csv",
+          starting_index: 1,
+          ending_index: 3,
+          number_padding_characters: 3
+        },
+        returns_files_filename_parameters: %{
+          filename_prefix: "test_returns_",
+          filename_suffix: ".csv",
+          starting_index: 1,
+          ending_index: 1,
+          number_padding_characters: 2
+        },
+        transactions_files_filename_parameters: %{
+          filename_prefix: "test_transactions_",
+          filename_suffix: ".csv",
+          starting_index: 1,
+          ending_index: 1,
+          number_padding_characters: 1
+        }
+      }
 
-      test_file_1 = "test_orders_1.csv"
-      test_file_2 = "test_orders_2.csv"
-      test_file_3 = "test_orders_3.csv"
-
-      file_names = [test_file_1, test_file_2, test_file_3]
-
-      ShopifyImportMassager.convert_files(input_folder, output_folder, file_names, file_names,
+      ShopifyImportMassager.convert_files(parameters,
         show_substitutions: true
       )
     end
