@@ -4,6 +4,8 @@ defmodule SubstitutionMapExtractor do
     and provide the substitution map for the conversion.
   """
 
+  @order_number_regex ~r|^#(\d+)$|
+
   # Massages a single file
   def extract_substitution_map(file_path) do
     file_path
@@ -152,7 +154,7 @@ defmodule SubstitutionMapExtractor do
                         order_name: order_name,
                         previous_order_name: previous_order_name,
                         replace_order_number: replace_order_number
-                      } = substitution_entry ->
+                      } = _substitution_entry ->
         output = %{
           order_name: order_name,
           previous_order_name: previous_order_name,

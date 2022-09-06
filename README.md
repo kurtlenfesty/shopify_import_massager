@@ -60,6 +60,8 @@ We can imply that the `BIZARRO-123-ORDER-NUMBER` should actually be
 
 ```shell
 mix deps.get
+
+# Start the IEX shell, where you will set the parameters and run the massager.
 iex -S mix
 
 # Note if you make coding changes, you will need to reload the code.
@@ -69,22 +71,77 @@ recompile
 
 ```
 
-From the IEX shell `iex(1)> `, etc. 
+_From the IEX shell `iex(1)> `, etc._ 
 
-### Massaging a single file (for testing)
+### Set the variables for the run
+**TODO This is still a bit complicated, could probably deduce the starting/ending indexes...**
+
+Setup the variables that you'll use for the run. For example:
 ```shell
-ShopifyImportMassager.convert_files()
+parameters = %{
+  input_folder: "/path/to/source_files",
+  output_folder: "/path/to/output_files",
+  orders_files_filename_parameters: %{
+    filename_prefix: "orders_export_",
+    filename_suffix: ".csv",
+    starting_index: 1,
+    ending_index: 25,
+    number_padding_characters: 2
+  },
+  returns_files_filename_parameters: %{
+    filename_prefix: "returns_export_",
+    filename_suffix: ".csv",
+    starting_index: 1,
+    ending_index: 4,
+    number_padding_characters: 1
+  },
+  transactions_files_filename_parameters: %{
+    filename_prefix: "transactions_export_",
+    filename_suffix: ".csv",
+    starting_index: 1,
+    ending_index: 12,
+    number_padding_characters: 2
+  }
+}
+
+# Use `[show_substitutions: false]` if you don't want to see what the
+# substitutions were.
+options = [show_substitutions: true]
 ```
 
-### Massage a single file and display the mapping results
+Note that the parameters can cover a range of situations, from a single file
+conversion to many files converted.
+
+### Convert the files:
 ```shell
-ShopifyImportMassager.convert_files()
+ShopifyImportMassager.convert_files(parameters, options)
+
 ```
 
-### Massage all the files:
+### Skipping returns or transactions files
+You'll always need at least 1 orders file so that the substitutions get
+extracted, but if you have no returns or transactions files to process, simply
+use an empty map for those parameters, as in:
 ```shell
-ShopifyImportMassager.convert_files()
+parameters = %{
+  input_folder: "/path/to/source_files",
+  output_folder: "/path/to/output_files",
+  orders_files_filename_parameters: %{
+    filename_prefix: "orders_export_",
+    filename_suffix: ".csv",
+    starting_index: 1,
+    ending_index: 25,
+    number_padding_characters: 2
+  },
+  returns_files_filename_parameters: %{},
+  transactions_files_filename_parameters: %{}
+}
+```
 
+## Testing
+Running the unit tests is simple:
+```shell
+mix test
 ```
 
 ## Installation

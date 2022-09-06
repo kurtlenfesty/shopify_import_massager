@@ -10,15 +10,15 @@ defmodule Massager.FilenameGenerator do
         number_padding_characters: number_padding_characters
       }) do
     starting_index..ending_index
-    |> Enum.map(fn index -> {Integer.toString(index), pad(index, number_padding_characters)} end)
+    |> Enum.map(fn index -> {Integer.to_string(index), pad(index, number_padding_characters)} end)
     |> Enum.map(fn {original_index, padded_index} ->
       {filename_prefix <> original_index <> filename_suffix,
        filename_prefix <> padded_index <> filename_suffix}
     end)
     |> Enum.map(fn {original_filename, adjusted_filename} ->
       %{
-        input_path: assemble_file_path(input_path_prefix, original_filename),
-        output_path: assemble_file_path(output_path_prefix, adjusted_filename)
+        input_file: assemble_file_path(input_path_prefix, original_filename),
+        output_file: assemble_file_path(output_path_prefix, adjusted_filename)
       }
     end)
   end
@@ -34,7 +34,7 @@ defmodule Massager.FilenameGenerator do
 
   def pad(index, number_padding_characters) do
     index
-    |> Integer.toString()
+    |> Integer.to_string()
     |> String.pad_leading(number_padding_characters, "0")
   end
 end
