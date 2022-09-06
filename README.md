@@ -2,8 +2,8 @@
 
 The script takes Shopify CSV exports and converts the order name in the csv to
 the _real_ underlying order number. This makes it easy to import the shopify
-data even if the customer is using multiple different order prefixes and suffixes
-and having third-party mechanisms injecting orders as well.
+data even if the customer is using multiple different order prefixes and
+suffixes and having third-party mechanisms injecting orders as well.
 
 ## Warning on what happens to the data
 **Warning**
@@ -20,15 +20,6 @@ shopify imports happen, so there's no issue with data getting properly linked.
 However, it does mean that the original order name of `E-75123-1` does not exist
 in the Solve data store. Generally this isn't so much an issue because we import
 historical data to get our summary data, not to look at individual orders.
-
-### Preparing to run the massager
-1. Make a copy of the `massager_parameters_example.ex` file and rename it to: `massager_parameters.ex`
-2. Rename the module name in `massager_parameters.ex` to `MassagerParameters`
-3. Change the parameters to reflect the files you are trying to modify
-
-Note that the copied `massager_parameters.ex` won't be added to git.
-
-**Note that the program won't run until a `MassagerParameters` module exists.**
 
 ## Structure the conversion
 
@@ -80,21 +71,19 @@ recompile
 
 From the IEX shell `iex(1)> `, etc. 
 
-**NOTE** You will need to edit `shopify_import_massager.ex` so the correct paths and files are laid out.
-
 ### Massaging a single file (for testing)
 ```shell
-MassagerCommander.massage_single()
+ShopifyImportMassager.convert_files()
 ```
 
 ### Massage a single file and display the mapping results
 ```shell
-MassagerCommander.massage_single_and_display()
+ShopifyImportMassager.convert_files()
 ```
 
 ### Massage all the files:
 ```shell
-MassagerCommander.massage_all()
+ShopifyImportMassager.convert_files()
 
 ```
 
@@ -114,4 +103,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/shopify_import_massager](https://hexdocs.pm/shopify_import_massager).
-
