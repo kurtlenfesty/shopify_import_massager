@@ -1,4 +1,9 @@
 defmodule SubstitutionMapExtractor do
+  @moduledoc """
+    Functions to extract out any order numbers that need to get converted
+    and provide the substitution map for the conversion.
+  """
+
   # Massages a single file
   def extract_substitution_map(file_path) do
     file_path
