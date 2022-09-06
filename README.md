@@ -1,2 +1,21 @@
-# shopify_import_massager
-Adjusts shopify csv exports so that order numbers are consistently ordered
+# ShopifyImportMassager
+
+**TODO: Add description**
+
+## Installation
+
+If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+by adding `shopify_import_massager` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [
+    {:shopify_import_massager, "~> 0.1.0"}
+  ]
+end
+```
+
+Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
+and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
+be found at [https://hexdocs.pm/shopify_import_massager](https://hexdocs.pm/shopify_import_massager).
+
