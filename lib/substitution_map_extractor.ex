@@ -7,26 +7,43 @@ defmodule SubstitutionMapExtractor do
   @order_number_regex ~r|^#(\d+)$|
 
   # Massages a single file
-  def extract_substitution_map(file_path) do
-    file_path
+  def extract_substitution_map(%{
+        file_name: file_name,
+        previous_file_last_order_number: previous_file_last_order_number
+      }) do
+    file_name
     |> Path.expand()
     |> Path.absname()
     |> IO.inspect(label: "Extracting substitution map from:")
     |> File.stream!()
     |> CSV.decode!()
-    |> convert()
+    |> convert(previous_file_last_order_number)
   end
 
-  def convert(decoded_csv) do
-    decoded_csv
-    # Remove the first line, it's just headers
-    |> Enum.drop(1)
-    |> convert_to_order_number_name_map()
-    |> convert_mapped()
-    |> Enum.filter(fn %{is_valid: is_valid} = _row_map -> not is_valid end)
-    |> Enum.map(fn %{order_number: order_number} = conversion_map ->
-      conversion_map |> Map.put(:replace_order_number, "##{order_number}")
-    end)
+  def convert(decoded_csv, previous_file_last_order_number) do
+    raw_mapped =
+      decoded_csv
+      # Remove the first line, it's just headers
+      |> Enum.drop(1)
+      # We go from the last entry to the first entry
+      # which is equivalent to figuring out the substitutions from the oldest
+      # entry to the newest entry.
+      # We do this because the very first entry is likely #1001, and we can
+      # usually have accurate numbering from this point.
+      |> Enum.reverse()
+      |> convert_to_order_number_name_map()
+      |> convert_mapped(previous_file_last_order_number)
+
+    filtered =
+      raw_mapped
+      |> Enum.filter(fn %{is_valid: is_valid} = _row_map -> not is_valid end)
+      |> Enum.map(fn %{order_number: order_number} = conversion_map ->
+        conversion_map |> Map.put(:replace_order_number, "##{order_number}")
+      end)
+
+    [%{order_number: file_last_order_number} | _] = raw_mapped |> Enum.reverse()
+
+    %{conversions: filtered, file_last_order_number: file_last_order_number}
   end
 
   def display_results(converted_and_filtered) do
@@ -48,9 +65,11 @@ defmodule SubstitutionMapExtractor do
     |> Enum.map(&to_order_number_name_map/1)
   end
 
-  def convert_mapped(order_number_name_map) do
+  def convert_mapped(order_number_name_map, previous_file_last_order_number) do
     order_number_name_map
-    |> Enum.reduce([], &populate_missing_order_numbers/2)
+    |> Enum.reduce([], fn current_row, previous_rows ->
+      populate_missing_order_numbers(current_row, previous_rows, previous_file_last_order_number)
+    end)
     # Reverse our list so it's newest to oldest
     |> Enum.reverse()
 
@@ -85,7 +104,8 @@ defmodule SubstitutionMapExtractor do
 
   def populate_missing_order_numbers(
         current_row = %{order_name: order_name, order_number: order_number},
-        previous_rows
+        previous_rows,
+        previous_file_last_order_number
       ) do
     %{order_number: previous_order_number, order_name: previous_order_name} =
       extract_previous_row(previous_rows)
@@ -104,7 +124,10 @@ defmodule SubstitutionMapExtractor do
               #              extracted = extract_previous_row_order_number(previous_rows)
               #              %{previous_rows: previous_rows, extracted: extracted}
               #              |> IO.inspect(label: "\n\nDEBUG 104")
-              extract_previous_row_order_number(previous_rows) - 1
+              # Since we are _incrementing_ are numbering as we go from oldest
+              # to newest entries, we add 1.
+              extract_previous_row_order_number(previous_rows, previous_file_last_order_number) +
+                1
 
             _ ->
               order_number
@@ -120,15 +143,24 @@ defmodule SubstitutionMapExtractor do
     [updated_current_row | previous_rows]
   end
 
-  def extract_previous_row_order_number(previous_rows) do
+  def extract_previous_row_order_number(previous_rows, previous_file_last_order_number) do
     %{order_number: previous_order_number} = extract_previous_row(previous_rows)
 
-    if previous_order_number == nil && previous_rows != [] do
-      # This is the first row so order_number must _NOT_ be nil
-      IO.puts("Unexpected previous rows without an order number: #{inspect(previous_rows)}")
-    end
+    case {previous_order_number, previous_rows} do
+      {nil, []} ->
+        # This is the first row of the file, so if that's the case, then we need
+        # use the previous file's last order number.
+        IO.puts(
+          "Unexpected non-number previous_order_number: #{inspect(previous_order_number)}, " <>
+            "previous rows: #{inspect(previous_rows)}, " <>
+            "using previous_file_last_order_number: #{inspect(previous_file_last_order_number)}"
+        )
 
-    previous_order_number
+        previous_file_last_order_number
+
+      _ ->
+        previous_order_number
+    end
   end
 
   def extract_previous_row(previous_rows) do
